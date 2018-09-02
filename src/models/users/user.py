@@ -7,4 +7,3 @@ class User(object):
 
     def __repr__(self):
         return "<Email: {} & PWD: {}>".format(seld.email, self.password)
-    
