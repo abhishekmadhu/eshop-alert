@@ -35,3 +35,34 @@ class User(object):
             raise UserErrors.IncorrectPasswordError('The password is wrong.')
 
         return True
+
+    @staticmethod
+    def register_user(email, password):
+        """
+
+        :param email: user's preferred email
+        :param password: sha512 hashed password
+        :return: True if registered successfully, or raise known exceptions, or False otherwise
+        """
+        user_data = Database.find_one(collection='users', query={"email": email})
+
+        if user_data is not None:
+            # Tell the user that they are already registered
+            raise UserErrors.UserAlreadyRegisteredError("An user already exists for this e-mail.")
+
+        if not Utils.email_is_valid(email):
+            # Tell the user that the email is not constructed properly
+            raise UserErrors.InvalidEmailError('Incorrect email format (yourname@yourdomain.com)')
+
+        User(email=email, password=Utils.hash_password(password)).save_to_db()
+
+        return True
+
+    def save_to_db(self):
+        Database.insert(collection='users', data=self.json())
+
+    def json(self):
+        return {"_id": self._id,
+                "email": self.email,
+                "password": self.password
+        }
