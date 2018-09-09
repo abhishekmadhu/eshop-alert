@@ -1,20 +1,21 @@
 import uuid
 
 import requests
-from bs4 import BeautifulSoup
 import re
 import src.models.items.constants as ItemConstants
 
+from bs4 import BeautifulSoup
 from src.common.database import Database
+from src.models.stores.store import Store
 
 __author__ = "abhishekmadhu"
 
 
 class Item(object):
-    def __init__(self, name, price, url, store, _id=None):
+    def __init__(self, name, url, _id=None):
         self.name = name
         self.url = url
-        self.store = store
+        store = Store.find_by_url(url)
         tag_name = store.tag_name
         query = store.query
         self.price = self.load_price(tag_name=tag_name, query=query)
@@ -35,16 +36,24 @@ class Item(object):
         :return:
         """
         request = requests.get(self.url)
-        content = self.content
+        content = request.content
         soup = BeautifulSoup(content, 'html.parser')
-        element = soup.find(tag_name, query)
+        soup = soup if soup is not None else "This is an empty soup"
 
-        string_price = element.text.strip()
+        print(soup)         #
 
-        pattern = re.compile("(\d+.\d+)")
-        match = pattern.search(string_price)
+        element = soup.find(tag_name, query)        # cannot find this tag
+        element = element if element is not None else "The element variable is a Nonetype object as soup.find() returned None"
 
-        return match.group()
+        print(element)      #
+
+        if element is not None:
+            string_price = element.text.strip()
+            pattern = re.compile("(\d+.\d+)")
+            match = pattern.search(string_price)
+            return match.group()
+        else:
+            print("Stopping, as element variable is None!")
 
     def save_to_mongo(self):
         Database.insert(ItemConstants.COLLECTION, self.json())
