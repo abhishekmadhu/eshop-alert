@@ -1,3 +1,3 @@
 __author__ = "abhishekmadhu"
 
-COLLECTIONS = "items"
+COLLECTION = "items"

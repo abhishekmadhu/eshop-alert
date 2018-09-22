@@ -35,14 +35,14 @@ class Alert(object):
     @classmethod
     def find_needing_update(cls, minutes_since_update=AlertConstants.ALERT_TIMEOUT):
         last_updated_limit = datetime.datetime.utcnow() - datetime.timedelta(minutes=minutes_since_update)
-        print(last_updated_limit)   #
+        # print(last_updated_limit)   #
         return [cls(**element) for element in Database.find(AlertConstants.COLLECTION,
                                                             {"last_checked":
                                                                  { "$lte": last_updated_limit }
                                                              })]
 
     def save_to_mongo(self):
-        Database.insert(AlertConstants.COLLECTION, self.json())
+        Database.update(AlertConstants.COLLECTION, {"_id": self._id}, self.json())
 
     def json(self):
         return {
@@ -56,9 +56,13 @@ class Alert(object):
     def load_item_price(self):
         self.item.load_price()
         self.last_checked = datetime.datetime.utcnow()
-        self.save_to_mongo()    # The _id would conflict from the second time, and it should not get saved
+        self.save_to_mongo()
+        self.item.save_to_mongo()
         return self.item.price
 
     def send_email_if_price_reached(self):
-        if self.item.price <= self.price_limit:
+        if self.item.price < self.price_limit:
             self.send()
+
+    def update_last_checked(self):      # redundant, remove after the end
+        Database.update_last_checked(collection=AlertConstants.COLLECTION, _id=self._id, last_checked=self.last_checked)

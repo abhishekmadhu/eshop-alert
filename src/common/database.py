@@ -28,4 +28,33 @@ class Database(object):
     @staticmethod
     def count(collection, query):
         return Database.DATABASE[collection].count(query)
-        
+
+    @staticmethod
+    def update(collection, query, data):
+        Database.DATABASE[collection].update(query, data, upsert=True)
+
+    @staticmethod
+    def remove(collection, query):
+        return Database.DATABASE[collection].remove(query)
+
+    ########################################################
+
+    @staticmethod
+    def update_last_checked(collection, _id, last_checked):
+        Database.DATABASE[collection].update(
+            {"_id": _id},
+            {
+                "$set": {
+                    "last_checked": last_checked
+                }
+            })
+
+    @staticmethod
+    def update_price(collection, _id, price):       # redundant now, remove after completion
+        Database.DATABASE[collection].update(
+            {"_id": _id},
+            {
+                "$set": {
+                    "price": price
+                }
+            })
