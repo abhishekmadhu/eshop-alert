@@ -21,7 +21,7 @@ def login_user():
             if User.is_login_valid(email=email, password=password):
                 session['email'] = email
                 return redirect(url_for(".user_alerts"))    # The . denotes that the method is in current file
-            # else, send the user an error that the login is invalid, and redirect to the login page
+            # else, send the user_email an error that the login is invalid, and redirect to the login page
         except UserErrors.UserError as e:
             return e.message
 
@@ -39,7 +39,7 @@ def register_user():
             if User.register_user(email=email, password=password):
                 session['email'] = email
                 return redirect(url_for(".user_alerts"))    # The . denotes that the method is in current file
-            # else, send the user an error that the login is invalid, and redirect to the login page
+            # else, send the user_email an error that the login is invalid, and redirect to the login page
         except UserErrors.UserError as e:
             return e.message
 

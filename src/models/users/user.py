@@ -21,17 +21,17 @@ class User(object):
         """
         This method verifies whether a given email-password combination [as sent by the login form]
         is valid or not.
-        :param email: The user's email
-        :param password: A SHA512 hashed password the user sends by the login form
+        :param email: The user_email's email
+        :param password: A SHA512 hashed password the user_email sends by the login form
         :return: True if the combination is correct, else false
         """
         user_data = Database.find_one(collection='users', query={"email": email})
         if user_data is None:
-            # Tell user that no account exists for that email
-            raise UserErrors.UserDoesNotExistError('There is no user registered for this e-mail.')
+            # Tell user_email that no account exists for that email
+            raise UserErrors.UserDoesNotExistError('There is no user_email registered for this e-mail.')
 
         if not Utils.check_hashed_password(password, user_data['password']):
-            # Tell user that the password is wrong
+            # Tell user_email that the password is wrong
             raise UserErrors.IncorrectPasswordError('The password is wrong.')
 
         return True
@@ -40,18 +40,18 @@ class User(object):
     def register_user(email, password):
         """
 
-        :param email: user's preferred email
+        :param email: user_email's preferred email
         :param password: sha512 hashed password
         :return: True if registered successfully, or raise known exceptions, or False otherwise
         """
         user_data = Database.find_one(collection='users', query={"email": email})
 
         if user_data is not None:
-            # Tell the user that they are already registered
-            raise UserErrors.UserAlreadyRegisteredError("An user already exists for this e-mail.")
+            # Tell the user_email that they are already registered
+            raise UserErrors.UserAlreadyRegisteredError("An user_email already exists for this e-mail.")
 
         if not Utils.email_is_valid(email):
-            # Tell the user that the email is not constructed properly
+            # Tell the user_email that the email is not constructed properly
             raise UserErrors.InvalidEmailError('Incorrect email format (yourname@yourdomain.com)')
 
         User(email=email, password=Utils.hash_password(password)).save_to_db()

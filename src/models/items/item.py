@@ -16,15 +16,15 @@ class Item(object):
         self.name = name
         self.url = url
         store = Store.find_by_url(url)
-        tag_name = store.tag_name
-        query = store.query
-        self.price = self.load_price(tag_name=tag_name, query=query)
+        self.tag_name = store.tag_name
+        self.query = store.query
+        self.price = None
         self._id = uuid.uuid4().hex if _id is None else _id
 
     def __repr__(self):
         return "<Item {} costs {} at {}>".format(self.name, self.price, self.url)
 
-    def load_price(self, tag_name, query):
+    def load_price(self):
         """
         Amazon:
         <span id="priceblock_ourprice" class="a-size-medium a-color-price">
@@ -42,16 +42,18 @@ class Item(object):
 
         print(soup)         #
 
-        element = soup.find(tag_name, query)        # cannot find this tag
-        element = element if element is not None else "The element variable is a Nonetype object as soup.find() returned None"
+        element = soup.find(self.tag_name, self.query)        # cannot find this tag
+        element = element if element is not None else "The element variable is a Nonetype object" \
+                                                      " as soup.find() returned None"
 
-        print(element)      #
+        print(element)
 
         if element is not None:
             string_price = element.text.strip()
             pattern = re.compile("(\d+.\d+)")
             match = pattern.search(string_price)
-            return match.group()
+            self.price = match.group()
+            return self.price
         else:
             print("Stopping, as element variable is None!")
 
@@ -67,3 +69,7 @@ class Item(object):
 
     def get_from_mongo(self):
         return Database.find_one(collection=ItemConstants.COLLECTIONS, query={"name": self.name})
+
+    @classmethod
+    def get_by_id(cls, item_id):
+        return cls(**Database.find_one(collection=ItemConstants.COLLECTIONS, query={"_id": item_id}))
